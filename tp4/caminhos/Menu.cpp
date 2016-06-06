@@ -66,10 +66,10 @@ extern void runTask(int task);
 
   void Menu::boot(){
     //INIT MENU OPTIONS
-    MenuItem* menu0 = new MenuItem(0, "Equipe I.S.I.W.Y.", "Press any to begin");
+    MenuItem* menu0 = new MenuItem(0, "     Equipe     ", "   I.S.I.W.Y.   ");
     MenuItem* menu1 = new MenuItem(1, "Caminhos", "");
     MenuItem* menu11 = new MenuItem(11, "Quadrado", "");
-    MenuItem* menu12 = new MenuItem(12, "Retangulo", "");
+    MenuItem* menu12 = new MenuItem(12, "Triangulo", "");
     MenuItem* menu13 = new MenuItem(13, "Reta", "");
     MenuItem* menu14 = new MenuItem(14, "Config Lado", "");
 
