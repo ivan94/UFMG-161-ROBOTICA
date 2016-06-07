@@ -9,6 +9,7 @@ extern LiquidCrystal lcd;
 MotorController::MotorController(int motorId, Adafruit_MotorShield& shield, int dirCorrect, ShaftEncoder* encoder):controller(&speed, &y, &goalSpeed, 23, 0, 1.8, DIRECT){
   goalSpeed = 0;
   avgSpeed = 0;
+  this->motorId = motorId;
   motor = shield.getMotor(motorId);
   this->dirCorrect = dirCorrect;
   this->encoder = encoder;
@@ -56,7 +57,10 @@ void MotorController::control(){
     value = -255;
   }
 
-  //lcd.print(speed);
+  if(motorId == 2){
+    lcd.setCursor(0, 1);
+    lcd.print(speed);
+  }
   //lcd.print(" - ");
   //lcd.print(value);
   //lcd.print("               ");

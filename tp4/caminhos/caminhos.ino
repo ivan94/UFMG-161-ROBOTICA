@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <LiquidCrystal.h>
 #include <IRremote.h>
+#include "ColorDetect.hpp"
 #include "ShaftEncoder.hpp"
 #include "MotorController.hpp"
 #include "Menu.hpp"
@@ -9,6 +10,15 @@
 /************ Menu Libraries ******************/
 LiquidCrystal lcd(8,9,4,5,6,7);
 Menu menu(&lcd);
+
+/************ COLOR DETECOT LIB ******************/
+int LDR_PIN = A15;
+
+int BLOCK_TRESHOLD = 300;
+
+ColorDetector detector(LDR_PIN, 23, 25, 27);
+
+int detecting_state = 0;
 
 /************ Motor Libraries ******************/
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
@@ -97,6 +107,8 @@ void loop() {
   }
 
   runTask(task);
+  //runTask(2);
+  //delay(1000);
   controllerM1.control();
   controllerM2.control();
 }
@@ -178,6 +190,100 @@ void runTask(int newTask){
   if(task == 0){
     controllerM1.setGoal(0);
     controllerM2.setGoal(0);
+  }else if(task == 21){
+    int leitura = analogRead(LDR_PIN);
+    //procurando bloco
+    if(detecting_state == 0){
+      if(leitura > BLOCK_TRESHOLD){
+        //bloco encontrado, parando carrinho
+        controllerM1.setGoal(0);
+        controllerM2.setGoal(0);
+        detecting_state = 1; 
+      }else{
+        controllerM1.setGoal(2);
+        controllerM2.setGoal(2);
+      }
+    }else if(detecting_state == 1){
+      //detectando cor do bloco
+      detector.checkColour();
+      int color = detector.getColour();
+      //define o estado com base na cor detectada
+      detecting_state = color + 2;
+      baseTime = millis();
+    }else if(detecting_state == 2){
+      //tarefa do amarelo
+      lcd.setCursor(0, 1);
+      lcd.print("Amarelo");
+      lcd.print(LCD_BLANK);
+      int s = 2;
+      unsigned long tempoVolta = distanceToDelay(5, s);
+      unsigned long tempoCurva = angleToDelay(90, s);
+      if((millis()-baseTime) < tempoVolta){
+        controllerM1.setGoal(-s);
+        controllerM2.setGoal(-s);
+      }else if((millis()-baseTime) < tempoVolta+tempoCurva){
+        controllerM1.setGoal(-s);
+        controllerM2.setGoal(s);
+      }else{
+        detecting_state = 0;
+      }
+    }else if(detecting_state == 3){
+      //tarefa do vermelho
+      lcd.setCursor(0, 1);
+      lcd.print("Vermelho");
+      lcd.print(LCD_BLANK);
+      int s = 2;
+      unsigned long tempoVolta = distanceToDelay(5, s);
+      unsigned long tempoCurva = angleToDelay(180, s);
+      if((millis()-baseTime) < tempoVolta){
+        controllerM1.setGoal(-s);
+        controllerM2.setGoal(-s);
+      }else if((millis()-baseTime) < tempoVolta+tempoCurva){
+        controllerM1.setGoal(-s);
+        controllerM2.setGoal(s);
+      }else{
+        detecting_state = 0;
+      }
+    }else if(detecting_state == 4){
+      //tarefa do verde
+      lcd.setCursor(0, 1);
+      lcd.print("Verde");
+      lcd.print(LCD_BLANK);
+      int s = 2;
+      unsigned long tempoVolta = distanceToDelay(5, s);
+      unsigned long tempoBuzzer = angleToDelay(90, s);
+      if((millis()-baseTime) < tempoVolta){
+        controllerM1.setGoal(-s);
+        controllerM2.setGoal(-s);
+      }else if((millis()-baseTime) < tempoVolta+tempoBuzzer){
+        controllerM1.setGoal(0);
+        controllerM2.setGoal(0);
+        //emite sinal sonoro
+      }else{
+        detecting_state = 0;
+      }
+    }else if(detecting_state == 5){
+      //tarefa do azul
+      lcd.setCursor(0, 1);
+      lcd.print("Azul");
+      lcd.print(LCD_BLANK);
+      int s = 2;
+      unsigned long tempoVolta = distanceToDelay(5, s);
+      unsigned long tempoCurva = angleToDelay(90, s);
+      if((millis()-baseTime) < tempoVolta){
+        controllerM1.setGoal(-s);
+        controllerM2.setGoal(-s);
+      }else if((millis()-baseTime) < tempoVolta+tempoCurva){
+        controllerM1.setGoal(s);
+        controllerM2.setGoal(-s);
+      }else{
+        detecting_state = 0;
+      }
+    }
+    //runTask(0);
+  }else if(task == 22){
+    detector.calibrate();
+    runTask(0);
   }else if(task == 14){
     lcd.setCursor(0, 1);
     lcd.print("Tamanho: ");

@@ -68,20 +68,27 @@ extern void runTask(int task);
     //INIT MENU OPTIONS
     MenuItem* menu0 = new MenuItem(0, "     Equipe     ", "   I.S.I.W.Y.   ");
     MenuItem* menu1 = new MenuItem(1, "Caminhos", "");
+    MenuItem* menu2 = new MenuItem(2, "Detectar cor", "");
     MenuItem* menu11 = new MenuItem(11, "Quadrado", "");
     MenuItem* menu12 = new MenuItem(12, "Triangulo", "");
     MenuItem* menu13 = new MenuItem(13, "Reta", "");
     MenuItem* menu14 = new MenuItem(14, "Config Lado", "");
+    MenuItem* menu21 = new MenuItem(21, "Detectar", "");
+    MenuItem* menu22 = new MenuItem(22, "Calibrar", "");
 
     menu0->setNavigation(menu1, menu1, menu1, menu1);
-    menu1->setNavigation(NULL, NULL, menu11, menu0);
+    menu1->setNavigation(menu2, menu2, menu11, menu0);
+    menu2->setNavigation(menu1, menu1, menu21, menu0);
     menu11->setNavigation(menu12, menu14, NULL, menu1);
     menu12->setNavigation(menu13, menu11, NULL, menu1);
     menu13->setNavigation(menu14, menu12, NULL, menu1);
     menu14->setNavigation(menu11, menu13, NULL, menu1);
+    menu21->setNavigation(menu22, menu22, NULL, menu2);
+    menu22->setNavigation(menu21, menu21, NULL, menu2);
+    
 
 
-    current = menu0;
+    current = menu11;
     
   }
   void Menu::display(){
@@ -127,6 +134,10 @@ extern void runTask(int task);
   void Menu::run(MenuItem* item){
     int id = item->getId();
     if(id >= 11 && id <= 14){
+      runTask(id);
+    }else if(id == 21){
+      runTask(id);
+    }else if(id == 22){
       runTask(id);
     }
   }

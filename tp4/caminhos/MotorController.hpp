@@ -7,6 +7,7 @@
 
 class MotorController {
 private:
+  int motorId;
   PID controller;
   unsigned long baseTime;
   double goalSpeed;
