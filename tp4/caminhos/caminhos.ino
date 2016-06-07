@@ -25,7 +25,7 @@ int detecting_state = 0;
 /************ Motor Libraries ******************/
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 
-ShaftEncoder encoderM1(A13, 4, 1);
+ShaftEncoder encoderM1(A8, 4, 1);
 MotorController controllerM1(1, AFMS, -1, &encoderM1);
 
 ShaftEncoder encoderM2(A14, 4, 1);
@@ -151,7 +151,8 @@ int btnToNum(unsigned long code){
 }
 
 const double ROT_SPEED_RATIO = 2.75;
-const double VEHICLE_RADIUS = 10.5;
+const double VEHICLE_RADIUS = 11;
+
 
 double spd = 2;
 
@@ -185,6 +186,13 @@ void buttonPressed(unsigned long code){
   }
 }
 
+#define align_angle_size  10
+
+int lower = INFINITY;
+int lowerIndex  = -1;
+
+int angleReadings[360/align_angle_size];
+
 void runTask(int newTask){
   if(task != newTask){
     baseTime = millis();
@@ -193,6 +201,76 @@ void runTask(int newTask){
   if(task == 0){
     controllerM1.setGoal(0);
     controllerM2.setGoal(0);
+  }else if(task == 3){
+    int s = 2;
+    unsigned long tempoGiro = angleToDelay(360, s);
+    unsigned long tempo10Graus = angleToDelay(align_angle_size, s);
+    if((millis() - baseTime) < tempoGiro){
+      controllerM1.setGoal(s);
+      controllerM2.setGoal(-s);
+      for(int i = 0; i < 360/align_angle_size; i++){
+        if((millis()-baseTime) < (i+1)*tempo10Graus){
+          lcd.setCursor(0, 1);
+          lcd.print(i);
+          lcd.print(" ");
+          angleReadings[i] = analogRead(A13) + analogRead(A10);
+          lcd.print(angleReadings[i]);
+          lcd.print(LCD_BLANK);
+          break;
+        }
+      }
+    }else{
+      //runTask(0);
+      if(lowerIndex == -1){
+        lower = INFINITY;
+        lowerIndex = -1;
+        for(int i = 0; i < 360/align_angle_size; i++){
+          if(angleReadings[i] < lower){
+            lower = angleReadings[i];
+            lowerIndex = i;
+          }
+        }
+      }
+      lcd.setCursor(0, 1);
+      lcd.print(lowerIndex);
+      lcd.print(LCD_BLANK);
+      if((millis() - baseTime) < tempoGiro + (lowerIndex+1)*tempo10Graus){
+        controllerM1.setGoal(s);
+        controllerM2.setGoal(-s);
+      }else if((millis() - baseTime) < tempoGiro + (lowerIndex+1)*tempo10Graus + 2*tempo10Graus){
+        controllerM1.setGoal(-s);
+        controllerM2.setGoal(s);
+      }else{
+        lower = INFINITY;
+        lowerIndex = -1;
+        runTask(0);
+      }
+    }
+    /*if(alignCounter == 300){
+      avg = alignReadings / 300.0;
+      if((avg+20) <= oldAvg){
+        alignReadings = 0;
+        alignCounter = 0;
+        lcd.setCursor(0, 0);
+        lcd.print(analogRead(A13));
+        lcd.print("/");
+        lcd.print(analogRead(A10));
+        lcd.print(LCD_BLANK);
+        lcd.setCursor(0, 1);
+        lcd.print(avg);
+        lcd.print("/");
+        lcd.print(oldAvg);
+        lcd.print(LCD_BLANK);
+        oldAvg = avg;
+      }else{
+        runTask(0);
+      }
+    }else{
+      controllerM1.setGoal(2);
+      controllerM2.setGoal(-2);
+      alignCounter++;
+      alignReadings += analogRead(A13) + analogRead(A10);
+    }*/
   }else if(task == 21){
     int leitura = analogRead(LDR_PIN);
     //procurando bloco

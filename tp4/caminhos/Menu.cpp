@@ -75,20 +75,22 @@ extern void runTask(int task);
     MenuItem* menu14 = new MenuItem(14, "Config Lado", "");
     MenuItem* menu21 = new MenuItem(21, "Detectar", "");
     MenuItem* menu22 = new MenuItem(22, "Calibrar", "");
+    MenuItem* menu3 = new MenuItem(3, "ALinhamento", "");
 
     menu0->setNavigation(menu1, menu1, menu1, menu1);
     menu1->setNavigation(menu2, menu2, menu11, menu0);
-    menu2->setNavigation(menu1, menu1, menu21, menu0);
+    menu2->setNavigation(menu1, menu3, menu21, menu0);
     menu11->setNavigation(menu12, menu14, NULL, menu1);
     menu12->setNavigation(menu13, menu11, NULL, menu1);
     menu13->setNavigation(menu14, menu12, NULL, menu1);
     menu14->setNavigation(menu11, menu13, NULL, menu1);
     menu21->setNavigation(menu22, menu22, NULL, menu2);
     menu22->setNavigation(menu21, menu21, NULL, menu2);
+    menu3->setNavigation(menu1, menu2, NULL, menu0);
     
 
 
-    current = menu22;
+    current = menu3;
     
   }
   void Menu::display(){
@@ -133,12 +135,13 @@ extern void runTask(int task);
   }
   void Menu::run(MenuItem* item){
     int id = item->getId();
-    if(id >= 11 && id <= 14){
+    /*if(id >= 11 && id <= 14){
       runTask(id);
     }else if(id == 21){
       runTask(id);
     }else if(id == 22){
       runTask(id);
-    }
+    }else if(id == 3){*/
+    runTask(id);
   }
 
