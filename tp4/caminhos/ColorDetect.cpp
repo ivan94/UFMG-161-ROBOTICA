@@ -63,6 +63,8 @@ void ColorDetector::calibrate(){
      digitalWrite(ledArray[i],LOW);
      delay(100);
   }
+  lcd.setCursor(0, 1);
+  lcd.print("Calibrado            ");
 }
 
 void ColorDetector::checkColour(){
@@ -99,9 +101,36 @@ int ColorDetector::getColour(){
   ValorLidoR = colourArray[0];
   ValorLidoG = colourArray[1];
   ValorLidoB = colourArray[2];
-    
-  if( ValorLidoR< tolerancia && ValorLidoG <tolerancia && ValorLidoB <tolerancia 
+
+  /*if( ValorLidoR< branco(0,1) && ValorLidoG <branco(1,1) && ValorLidoB <branco(2,1) 
+  && ValorLidoR>branco(0,-1) && ValorLidoG > branco(1,-1) && ValorLidoB >branco(2,-1) ){
+    //Serial.println("Branco");
+  }
+
+  else if( ValorLidoR< tolerancia && ValorLidoG <tolerancia && ValorLidoB <tolerancia 
   && ValorLidoR>(-1*tolerancia) && ValorLidoG > (-1*tolerancia) && ValorLidoB > (-1*tolerancia) ){
+   // Serial.println("Preto");
+  }
+  else if (ValorLidoB < ValorLidoR && ValorLidoB < ValorLidoG  && ValorLidoG < ValorLidoR && ValorLidoR < (ValorLidoG+tolerancia) && ValorLidoR > (ValorLidoG-tolerancia)) {  
+     Serial.println("Amarelo");
+  } 
+  
+  else if (ValorLidoG < ValorLidoR && ValorLidoB < ValorLidoR && ValorLidoB < ValorLidoG) {  
+    Serial.println("Vermelho"); 
+  } 
+  //Verifica se a cor verde foi detectada  
+  else if (ValorLidoR < ValorLidoG && ValorLidoB < ValorLidoG) {  
+    Serial.println("Verde");
+  }  
+  //Verifica se a cor azul foi detectada  
+  else if (ValorLidoR < ValorLidoB && ValorLidoG < ValorLidoB && ValorLidoR < ValorLidoG ) {  
+     Serial.println("Azul");
+  }
+  else{
+     Serial.println("Num eh nada");
+  }*/
+    
+  if (ValorLidoB < ValorLidoR && ValorLidoB < ValorLidoG  && ValorLidoG < ValorLidoR && ValorLidoR < (ValorLidoG+tolerancia) && ValorLidoR > (ValorLidoG-tolerancia)) {  
     return 0;
   }
   

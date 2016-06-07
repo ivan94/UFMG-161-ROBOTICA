@@ -57,10 +57,10 @@ void MotorController::control(){
     value = -255;
   }
 
-  if(motorId == 2){
+  /*if(motorId == 2){
     lcd.setCursor(0, 1);
     lcd.print(speed);
-  }
+  }*/
   //lcd.print(" - ");
   //lcd.print(value);
   //lcd.print("               ");

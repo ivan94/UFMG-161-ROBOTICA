@@ -14,9 +14,11 @@ Menu menu(&lcd);
 /************ COLOR DETECOT LIB ******************/
 int LDR_PIN = A15;
 
-int BLOCK_TRESHOLD = 300;
+int BLOCK_TRESHOLD = 250;
 
 ColorDetector detector(LDR_PIN, 23, 25, 27);
+
+int BUZZER_PIN = 45;
 
 int detecting_state = 0;
 
@@ -69,6 +71,7 @@ void setup() {
   menu.boot();
   irrecv.enableIRIn(); // Start the receiver
   Serial.begin(9600);
+  pinMode(BUZZER_PIN, OUTPUT);
 
   menu.display();
 }
@@ -251,15 +254,17 @@ void runTask(int newTask){
       lcd.print(LCD_BLANK);
       int s = 2;
       unsigned long tempoVolta = distanceToDelay(5, s);
-      unsigned long tempoBuzzer = angleToDelay(90, s);
+      unsigned long tempoBuzzer = 1000;
       if((millis()-baseTime) < tempoVolta){
         controllerM1.setGoal(-s);
         controllerM2.setGoal(-s);
       }else if((millis()-baseTime) < tempoVolta+tempoBuzzer){
         controllerM1.setGoal(0);
         controllerM2.setGoal(0);
-        //emite sinal sonoro
+
+        digitalWrite(BUZZER_PIN, HIGH);
       }else{
+        digitalWrite(BUZZER_PIN, LOW);
         detecting_state = 0;
       }
     }else if(detecting_state == 5){
