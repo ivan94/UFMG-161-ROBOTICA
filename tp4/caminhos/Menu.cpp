@@ -75,11 +75,11 @@ extern void runTask(int task);
     MenuItem* menu14 = new MenuItem(14, "Config Lado", "");
     MenuItem* menu21 = new MenuItem(21, "Detectar", "");
     MenuItem* menu22 = new MenuItem(22, "Calibrar", "");
-    MenuItem* menu3 = new MenuItem(3, "ALinhamento", "");
+    MenuItem* menu3 = new MenuItem(3, "Alinhamento", "");
 
     menu0->setNavigation(menu1, menu1, menu1, menu1);
-    menu1->setNavigation(menu2, menu2, menu11, menu0);
-    menu2->setNavigation(menu1, menu3, menu21, menu0);
+    menu1->setNavigation(menu2, menu3, menu11, menu0);
+    menu2->setNavigation(menu3, menu1, menu21, menu0);
     menu11->setNavigation(menu12, menu14, NULL, menu1);
     menu12->setNavigation(menu13, menu11, NULL, menu1);
     menu13->setNavigation(menu14, menu12, NULL, menu1);

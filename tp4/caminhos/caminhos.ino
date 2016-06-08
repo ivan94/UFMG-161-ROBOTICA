@@ -220,7 +220,7 @@ void runTask(int newTask){
         }
       }
     }else{
-      //runTask(0);
+      unsigned long dT = millis();
       if(lowerIndex == -1){
         lower = INFINITY;
         lowerIndex = -1;
@@ -234,10 +234,11 @@ void runTask(int newTask){
       lcd.setCursor(0, 1);
       lcd.print(lowerIndex);
       lcd.print(LCD_BLANK);
-      if((millis() - baseTime) < tempoGiro + (lowerIndex+1)*tempo10Graus){
+      dT = millis()-dT;
+      if((millis() - baseTime) < tempoGiro + dT + (lowerIndex+1)*tempo10Graus){
         controllerM1.setGoal(s);
         controllerM2.setGoal(-s);
-      }else if((millis() - baseTime) < tempoGiro + (lowerIndex+1)*tempo10Graus + 2*tempo10Graus){
+      }else if((millis() - baseTime) < tempoGiro + dT + (lowerIndex+1)*tempo10Graus + 3*tempo10Graus){
         controllerM1.setGoal(-s);
         controllerM2.setGoal(s);
       }else{
