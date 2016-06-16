@@ -24,11 +24,7 @@ MotorController::MotorController(int motorId, Adafruit_MotorShield& shield, int 
 void MotorController::setGoal(double speed){
   if(speed != goalSpeed){
     goalSpeed = speed;
-    //encoder->boot();
-    //value = 0;
-    //baseTime = millis();
   }
-  //controller.boot();
 }
 
 void MotorController::control(){
@@ -57,14 +53,6 @@ void MotorController::control(){
     value = -255;
   }
 
-  /*if(motorId == 2){
-    lcd.setCursor(0, 1);
-    lcd.print(speed);
-  }*/
-  //lcd.print(" - ");
-  //lcd.print(value);
-  //lcd.print("               ");
-  //apply value to motor;
   applySpeed();
 
   baseTime = millis();

@@ -76,6 +76,8 @@ extern void runTask(int task);
     MenuItem* menu21 = new MenuItem(21, "Detectar", "");
     MenuItem* menu22 = new MenuItem(22, "Calibrar", "");
     MenuItem* menu3 = new MenuItem(3, "Alinhamento", "");
+    MenuItem* menu31 = new MenuItem(31, "Alinhar", "");
+    MenuItem* menu32 = new MenuItem(32, "Calibrar", "");
 
     menu0->setNavigation(menu1, menu1, menu1, menu1);
     menu1->setNavigation(menu2, menu3, menu11, menu0);
@@ -87,10 +89,12 @@ extern void runTask(int task);
     menu21->setNavigation(menu22, menu22, NULL, menu2);
     menu22->setNavigation(menu21, menu21, NULL, menu2);
     menu3->setNavigation(menu1, menu2, NULL, menu0);
+    menu31->setNavigation(menu32, menu32, NULL, menu0);
+    menu32->setNavigation(menu31, menu31, NULL, menu3);
     
 
 
-    current = menu3;
+    current = menu0;
     
   }
   void Menu::display(){

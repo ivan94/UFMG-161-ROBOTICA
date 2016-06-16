@@ -17,6 +17,10 @@ private:
   float colourArray[3];
   float whiteArray[3];
   float blackArray[3];
+  float redArray[3];
+  float blueArray[3];
+  float greenArray[3];
+  float yellowArray[3];
 
   //place holder for average
   int avgRead;
@@ -27,6 +31,7 @@ public:
   void calibrate();
   void checkColour();
   void getReading(int times);
+  double colorDistance(float* color, float* reference);
   int getColour();
 };
 

@@ -2,7 +2,7 @@
 #include <LiquidCrystal.h>
 #include "ColorDetect.hpp"
 
-#define tolerancia 50
+#define tolerancia 60
 
 extern LiquidCrystal lcd;
 
@@ -21,6 +21,22 @@ ColorDetector::ColorDetector(int ldr, int red, int green, int blue){
   ledArray[0] = red;
   ledArray[1] = green;
   ledArray[2] = blue;
+
+  redArray[0] = 250;
+  redArray[1] = 100;
+  redArray[2] = 0;
+
+  greenArray[0] = 0;
+  greenArray[1] = 250;
+  greenArray[2] = 0;
+
+  blueArray[0] = 0;
+  blueArray[1] = 200;
+  blueArray[2] = 250;
+
+  yellowArray[0] = 250;
+  yellowArray[1] = 180;
+  yellowArray[2] = 0;
   
 
   ValorLidoR = 0;
@@ -93,57 +109,34 @@ void ColorDetector::getReading(int times){
   avgRead = (tally)/times;
 }
 
-//0 Preto
+//0 Amarelo
 //1 Vermelho
 //2 Verde
 //3 Azul
+
+double ColorDetector::colorDistance(float* color, float* reference){
+  double r = color[0] - reference[0];
+  double g = color[1] - reference[1];
+  double b = color[2] - reference[2];
+
+  return sqrt(r*r+b*b+g*g);
+}
+
 int ColorDetector::getColour(){
-  ValorLidoR = colourArray[0];
-  ValorLidoG = colourArray[1];
-  ValorLidoB = colourArray[2];
+  double dR = colorDistance(colourArray, redArray);
+  double dG = colorDistance(colourArray, greenArray);
+  double dB = colorDistance(colourArray, blueArray);
+  double dY = colorDistance(colourArray, yellowArray);
 
-  /*if( ValorLidoR< branco(0,1) && ValorLidoG <branco(1,1) && ValorLidoB <branco(2,1) 
-  && ValorLidoR>branco(0,-1) && ValorLidoG > branco(1,-1) && ValorLidoB >branco(2,-1) ){
-    //Serial.println("Branco");
-  }
 
-  else if( ValorLidoR< tolerancia && ValorLidoG <tolerancia && ValorLidoB <tolerancia 
-  && ValorLidoR>(-1*tolerancia) && ValorLidoG > (-1*tolerancia) && ValorLidoB > (-1*tolerancia) ){
-   // Serial.println("Preto");
-  }
-  else if (ValorLidoB < ValorLidoR && ValorLidoB < ValorLidoG  && ValorLidoG < ValorLidoR && ValorLidoR < (ValorLidoG+tolerancia) && ValorLidoR > (ValorLidoG-tolerancia)) {  
-     Serial.println("Amarelo");
-  } 
-  
-  else if (ValorLidoG < ValorLidoR && ValorLidoB < ValorLidoR && ValorLidoB < ValorLidoG) {  
-    Serial.println("Vermelho"); 
-  } 
-  //Verifica se a cor verde foi detectada  
-  else if (ValorLidoR < ValorLidoG && ValorLidoB < ValorLidoG) {  
-    Serial.println("Verde");
-  }  
-  //Verifica se a cor azul foi detectada  
-  else if (ValorLidoR < ValorLidoB && ValorLidoG < ValorLidoB && ValorLidoR < ValorLidoG ) {  
-     Serial.println("Azul");
-  }
-  else{
-     Serial.println("Num eh nada");
-  }*/
-    
-  if (ValorLidoB < ValorLidoR && ValorLidoB < ValorLidoG  && ValorLidoG < ValorLidoR && ValorLidoR < (ValorLidoG+tolerancia) && ValorLidoR > (ValorLidoG-tolerancia)) {  
+  if(dY < dR && dY < dG && dY < dB){
     return 0;
-  }
-  
-  else if (ValorLidoG < ValorLidoR && ValorLidoB < ValorLidoR) {  
+  }else if(dR < dY && dR < dG && dR < dB){
     return 1;
-  } 
-  //Verifica se a cor verde foi detectada  
-  else if (ValorLidoR < ValorLidoG && ValorLidoB < ValorLidoG) {  
+  }else if(dG < dR && dG < dY && dG < dB){
     return 2;
-  }  
-  //Verifica se a cor azul foi detectada  
-  else if (ValorLidoR < ValorLidoB && ValorLidoG < ValorLidoB) {  
-     return 3;
+  }else if(dB < dR && dB < dG && dB < dY){
+    return 3;
   }
   
 }

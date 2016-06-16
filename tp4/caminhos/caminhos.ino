@@ -14,7 +14,7 @@ Menu menu(&lcd);
 /************ COLOR DETECOT LIB ******************/
 int LDR_PIN = A15;
 
-int BLOCK_TRESHOLD = 250;
+int BLOCK_TRESHOLD = 600;
 
 ColorDetector detector(LDR_PIN, 23, 25, 27);
 
@@ -193,6 +193,8 @@ int lowerIndex  = -1;
 
 int angleReadings[360/align_angle_size];
 
+int alignHigh = 0, alignLow = 0, alignMiddle = 0;
+
 void runTask(int newTask){
   if(task != newTask){
     baseTime = millis();
@@ -233,45 +235,69 @@ void runTask(int newTask){
       }
       lcd.setCursor(0, 1);
       lcd.print(lowerIndex);
+      lcd.print(" ");
+      lcd.print(lower);
       lcd.print(LCD_BLANK);
       dT = millis()-dT;
+      int m1S = s;
+      int m2S = -s;
+
       if((millis() - baseTime) < tempoGiro + dT + (lowerIndex+1)*tempo10Graus){
-        controllerM1.setGoal(s);
-        controllerM2.setGoal(-s);
-      }else if((millis() - baseTime) < tempoGiro + dT + (lowerIndex+1)*tempo10Graus + 3*tempo10Graus){
-        controllerM1.setGoal(-s);
-        controllerM2.setGoal(s);
+        controllerM1.setGoal(m1S);
+        controllerM2.setGoal(m2S);
+      }else if((millis() - baseTime) < tempoGiro + dT + (lowerIndex+1)*tempo10Graus + 2*tempo10Graus){
+        controllerM1.setGoal(-m1S);
+        controllerM2.setGoal(-m2S);
       }else{
         lower = INFINITY;
         lowerIndex = -1;
         runTask(0);
       }
     }
-    /*if(alignCounter == 300){
-      avg = alignReadings / 300.0;
-      if((avg+20) <= oldAvg){
-        alignReadings = 0;
-        alignCounter = 0;
-        lcd.setCursor(0, 0);
-        lcd.print(analogRead(A13));
-        lcd.print("/");
-        lcd.print(analogRead(A10));
-        lcd.print(LCD_BLANK);
-        lcd.setCursor(0, 1);
-        lcd.print(avg);
-        lcd.print("/");
-        lcd.print(oldAvg);
-        lcd.print(LCD_BLANK);
-        oldAvg = avg;
-      }else{
-        runTask(0);
-      }
+  }else if(task == 31){
+    int reading = analogRead(A13) + analogRead(A10);
+    if(reading > alignHigh - 50 && reading < alignHigh - 50){
+      runTask(0);
     }else{
       controllerM1.setGoal(2);
       controllerM2.setGoal(-2);
-      alignCounter++;
-      alignReadings += analogRead(A13) + analogRead(A10);
-    }*/
+    }
+  }else if(task == 32){
+    lcd.setCursor(0, 1);
+    lcd.print("Calibrando alto");
+    lcd.print(LCD_BLANK);
+    delay(5000);
+    int readings = 0;
+    for(int i = 0;  i< 200; i++){
+      readings += analogRead(A13) + analogRead(A10);
+    }
+
+    alignHigh = readings/200;
+
+    lcd.setCursor(0, 1);
+    lcd.print("Calibrando Baixo");
+    lcd.print(LCD_BLANK);
+    delay(5000);
+    readings = 0;
+    for(int i = 0;  i< 200; i++){
+      readings += analogRead(A13) + analogRead(A10);
+    }
+
+    alignLow = readings/200;
+    
+    lcd.setCursor(0, 1);
+    lcd.print("Calibrando Meio");
+    lcd.print(LCD_BLANK);
+    delay(5000);
+    readings = 0;
+    for(int i = 0;  i< 200; i++){
+      readings += analogRead(A13) + analogRead(A10);
+    }
+
+    alignMiddle = readings/200;
+    lcd.setCursor(0, 1);
+    lcd.print(LCD_BLANK);
+    runTask(0);
   }else if(task == 21){
     int leitura = analogRead(LDR_PIN);
     //procurando bloco
@@ -282,8 +308,8 @@ void runTask(int newTask){
         controllerM2.setGoal(0);
         detecting_state = 1; 
       }else{
-        controllerM1.setGoal(2);
-        controllerM2.setGoal(2);
+        controllerM1.setGoal(spd);
+        controllerM2.setGoal(spd);
       }
     }else if(detecting_state == 1){
       //detectando cor do bloco
@@ -297,7 +323,7 @@ void runTask(int newTask){
       lcd.setCursor(0, 1);
       lcd.print("Amarelo");
       lcd.print(LCD_BLANK);
-      int s = 2;
+      int s = spd;
       unsigned long tempoVolta = distanceToDelay(5, s);
       unsigned long tempoCurva = angleToDelay(90, s);
       if((millis()-baseTime) < tempoVolta){
@@ -314,7 +340,7 @@ void runTask(int newTask){
       lcd.setCursor(0, 1);
       lcd.print("Vermelho");
       lcd.print(LCD_BLANK);
-      int s = 2;
+      int s = spd;
       unsigned long tempoVolta = distanceToDelay(5, s);
       unsigned long tempoCurva = angleToDelay(180, s);
       if((millis()-baseTime) < tempoVolta){
@@ -331,7 +357,7 @@ void runTask(int newTask){
       lcd.setCursor(0, 1);
       lcd.print("Verde");
       lcd.print(LCD_BLANK);
-      int s = 2;
+      int s = spd;
       unsigned long tempoVolta = distanceToDelay(5, s);
       unsigned long tempoBuzzer = 1000;
       if((millis()-baseTime) < tempoVolta){
@@ -351,7 +377,7 @@ void runTask(int newTask){
       lcd.setCursor(0, 1);
       lcd.print("Azul");
       lcd.print(LCD_BLANK);
-      int s = 2;
+      int s = spd;
       unsigned long tempoVolta = distanceToDelay(5, s);
       unsigned long tempoCurva = angleToDelay(90, s);
       if((millis()-baseTime) < tempoVolta){
