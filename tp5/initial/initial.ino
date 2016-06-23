@@ -25,7 +25,8 @@ int detecting_state = 0;
 /************ Motor Libraries ******************/
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 
-Adafruit_DCMotor* motor = AFMS.getMotor(1);
+Adafruit_DCMotor* motor1 = AFMS.getMotor(1);
+Adafruit_DCMotor* motor2 = AFMS.getMotor(2);
 
 ShaftEncoder encoderM1(A14, 6, 1);
 MotorController controllerM1(1, AFMS, 1, &encoderM1);
@@ -33,8 +34,12 @@ MotorController controllerM1(1, AFMS, 1, &encoderM1);
 ShaftEncoder encoderM2(A15, 6, 1);
 MotorController controllerM2(2, AFMS, -1, &encoderM2);
 
-const double ROT_SPEED_RATIO = 2.75;
-const double VEHICLE_RADIUS = 11;
+const double ROT_SPEED_RATIO = 5.11;
+const double VEHICLE_RADIUS = 12;
+
+/**********************SEGUE LINHA ********************/
+int OR_left = 43;
+int OR_right = 41;
 
 /************ LCD Shield buttons ******************/
 
@@ -99,13 +104,16 @@ void loop() {
   int button = read_LCD_buttons();
 
   if(button == btnUP){
-    //runTask(1);
-    motor->setSpeed(50);
-    motor->run(FORWARD);
+    runTask(1);
+//    /motor->setSpeed(50);
+//    motor->run(FORWARD);
     delay(300);
   }else if(button == btnDOWN){
-    //runTask(0);
-    motor->run(RELEASE);
+    runTask(0);
+    //motor->run(RELEASE);
+    delay(300);
+  }else if(button == btnRIGHT){
+    runTask(30);
     delay(300);
   }
 
@@ -114,16 +122,16 @@ void loop() {
   //Serial.println(analogRead(A15));
   
   lcd.setCursor(0, 0);
-  encoderM1.read();
-  spd = encoderM1.getSpeed();
-  if(millis() - baseTime >300){
-    lcd.print(spd);
-    lcd.print(LCD_BLANK);
-    baseTime = millis();
-  }
-  //controllerM1.control();
+//  encoderM2.read();
+//  spd = encoderM2.getSpeed();
+//  if(millis() - baseTime >300){
+//    lcd.print(spd);
+//    lcd.print(LCD_BLANK);
+//    baseTime = millis();
+//  }
+  controllerM1.control();
   lcd.setCursor(0, 1);
-  //controllerM2.control();
+  controllerM2.control();
   //delay(100);
 }
 
@@ -141,6 +149,12 @@ unsigned long angleToDelay(double a, double s){
   return distanceToDelay(distance, s);
 }
 
+double oldM = 0;
+int oldD = 0;
+
+int ct = 0;
+long v = 0;
+
 void runTask(int newTask){
   if(task != newTask){
     baseTime = millis();
@@ -150,15 +164,122 @@ void runTask(int newTask){
     controllerM1.setGoal(0);
     controllerM2.setGoal(0);
   }else if(task == 1){
-//    if((millis() - baseTime)%7000 < 5000){
-//      controllerM1.setGoal(1);
-//      controllerM2.setGoal(1);
-//    }else if((millis() - baseTime)%7000 < 10000){
-//      controllerM1.setGoal(-1);
-//      controllerM2.setGoal(-1);
+    if(analogRead(A8) < 150){
+      runTask(2);
+    }else{
+      controllerM1.setGoal(0);
+      controllerM2.setGoal(0);
+    }
+  }else if(task == 2){//orientaćão
+    if(millis()-baseTime > 200){
+      
+      baseTime = millis();
+      
+      int measure = v/ct;
+      v=0;
+      ct=0;  
+      
+      lcd.setCursor(0, 0);
+      lcd.print(measure);
+      lcd.print(LCD_BLANK);
+      lcd.setCursor(0, 1);
+      lcd.print(oldM);
+      lcd.print(LCD_BLANK);
+      
+      if(measure > oldM*1.03 && measure < oldM*0.97){
+        lcd.setCursor(10, 0);
+        lcd.print("ok");
+        controllerM1.setGoal(0);
+        controllerM2.setGoal(0);
+        runTask(3);
+        lcd.setCursor(10, 0);
+        lcd.print("ok");
+        //seguir reto ate chegar a linha preta
+      }
+    }else{
+      v+= analogRead(A10) - analogRead(A9);
+      ct++;
+      controllerM1.setGoal(2);
+      controllerM2.setGoal(-2);
+    }
+  }else if(task == 3){//forća a barra
+    if(millis()-baseTime < 3000){
+      //BY GABI
+      motor1->setSpeed(190);
+      motor2->setSpeed(190);
+      motor1->run(BACKWARD);
+      motor2->run(FORWARD);
+    }else if(millis()-baseTime < 4500){
+      motor1->setSpeed(190);
+      motor2->setSpeed(190);
+      motor1->run(BACKWARD);
+      motor2->run(RELEASE);
+    }else if(millis()-baseTime < 6000){
+      motor1->setSpeed(190);
+      motor2->setSpeed(190);
+      motor1->run(RELEASE);
+      motor2->run(FORWARD);
+    }
+    else {
+      runTask(4);
+    }
+  }else if(task == 4){//faz caminho
+    double t90 = angleToDelay(90, 2);
+    double t1 = distanceToDelay(90, 2);
+    double t2 = distanceToDelay(85, 2);
+    double t3 = distanceToDelay(10, 2);
+    if(millis()-baseTime < t1){
+      controllerM1.setGoal(2);
+      controllerM2.setGoal(2);
+    }else if(millis()-baseTime < t1 + t90){
+      controllerM1.setGoal(-2);
+      controllerM2.setGoal(2);
+    }else if(millis()-baseTime < t1 + t90 + (t2/2)){
+      controllerM1.setGoal(2);
+      controllerM2.setGoal(2);
+    }else if(millis()-baseTime < t1 + t90 + (t2/2) + t90){
+      controllerM1.setGoal(-2);
+      controllerM2.setGoal(2);
+    }else if(millis()-baseTime < t1 + t90 + (t2/2) + t90 + t1 + t3){
+      controllerM1.setGoal(2);
+      controllerM2.setGoal(2);
+    }
+//    }else if(millis()-baseTime < t1 + t90 + (t2/2) + 2*t90){
+//      controllerM1.setGoal(2);
+//      controllerM2.setGoal(-2);
+//    }else if(millis()-baseTime < t1 + t90 + (t2/2) + 2*t90 + t2){
+//      controllerM1.setGoal(2);
+//      controllerM2.setGoal(2);
+//    }else if(millis()-baseTime < t1 + t90 + (t2/2) + 2*t90 + t2 + 2*t90){
+//      controllerM1.setGoal(2);
+//      controllerM2.setGoal(-2);
+//    }else if(millis()-baseTime < t1 + t90 + (t2/2) + 2*t90 + t2 + 2*t90 + (t2/2)){
+//      controllerM1.setGoal(2);
+//      controllerM2.setGoal(2);
+//    }else if(millis()-baseTime < t1 + t90 + (t2/2) + 2*t90 + t2 + 2*t90 + (t2/2) + t90){
+//      controllerM1.setGoal(2);
+//      controllerM2.setGoal(-2);
+//    }else if(millis()-baseTime < t1 + t90 + (t2/2) + 2*t90 + t2 + 2*t90 + (t2/2) + t90 + t1){
+//      controllerM1.setGoal(2);
+//      controllerM2.setGoal(2);
 //    }
-    controllerM1.setGoal(7);
-    controllerM2.setGoal(7);
+    else{
+      runTask(0);
+    }
+  }
+  else if(task == 30){
+    //delay(1000);
+    long v = 0;
+    for(int i = 0; i<20; i++){
+      v+= analogRead(A10) - analogRead(A9);
+      delay(50);
+    }
+    oldM = v/20.0;
+    lcd.setCursor(0, 0);
+    lcd.print(oldM);
+    lcd.print(LCD_BLANK);
+    runTask(0);
   }
 }
+
 

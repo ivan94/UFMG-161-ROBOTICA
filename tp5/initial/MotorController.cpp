@@ -8,7 +8,7 @@ extern LiquidCrystal lcd;
 
 #define COMPUTE_DELAY 200
 
-MotorController::MotorController(int motorId, Adafruit_MotorShield& shield, int dirCorrect, ShaftEncoder* encoder):controller(&speed, &y, &goalSpeed, 1, 0, 0, DIRECT){
+MotorController::MotorController(int motorId, Adafruit_MotorShield& shield, int dirCorrect, ShaftEncoder* encoder):controller(&speed, &y, &goalSpeed, 23, 0, 0.5, DIRECT){
   goalSpeed = 0;
   avgSpeed = 0;
   this->motorId = motorId;
@@ -47,10 +47,10 @@ void MotorController::control(){
     speed = -speed;
   }
   controller.Compute();
-  lcd.print(speed);
-  lcd.print(" - ");
-  lcd.print(value);
-  lcd.print("                ");
+//  lcd.print(speed);
+//  lcd.print(" - ");
+//  lcd.print(value);
+//  lcd.print("                ");
 
 
   value += y;
